@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>IoT Power & WiFi Map - Firebase</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    
+    h2 {
+      color: #333;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .status-panel {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+    
+    .status-item {
+      text-align: center;
+      padding: 15px;
+      border-radius: 6px;
+    }
+    
+    .power-status {
+      background-color: #e8f5e8;
+      border: 2px solid #4caf50;
+    }
+    
+    .power-status.off {
+      background-color: #ffeaea;
+      border: 2px solid #f44336;
+    }
+    
+    .wifi-count {
+      background-color: #e3f2fd;
+      border: 2px solid #2196f3;
+    }
+    
+    .last-update {
+      background-color: #fff3e0;
+      border: 2px solid #ff9800;
+    }
+    
+    #map { 
+      height: 500px; 
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+    
+    .error {
+      background-color: #ffebee;
+      color: #c62828;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+    
+    .wifi-list {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-top: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    
+    .wifi-item {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .wifi-item:last-child {
+      border-bottom: none;
+    }
+    
+    .signal-strength {
+      padding: 4px 8px;
+      border-radius: 4px;
+      color: white;
+      font-size: 12px;
+      font-weight: bold;
+    }
+    
+    .signal-excellent { background-color: #4caf50; }
+    .signal-good { background-color: #8bc34a; }
+    .signal-fair { background-color: #ffeb3b; color: #333; }
+    .signal-poor { background-color: #ff9800; }
+    .signal-very-poor { background-color: #f44336; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>IoT Power & WiFi Network Monitor</h2>
+    
+    <div id="loading" class="loading">
+      <p>Loading Firebase data...</p>
+    </div>
+    
+    <div id="error" class="error" style="display: none;">
+      <p>Error loading data. Please check Firebase configuration.</p>
+    </div>
+    
+    <div id="content" style="display: none;">
+      <div class="status-panel">
+        <div class="status-item power-status" id="power-status">
+          <h3>Power Status</h3>
+          <p id="power-text">Loading...</p>
+          <small id="power-value"></small>
+        </div>
+        
+        <div class="status-item wifi-count">
+          <h3>WiFi Networks</h3>
+          <p id="wifi-count">Loading...</p>
+          <small>Networks detected</small>
+        </div>
+        
+        <div class="status-item last-update">
+          <h3>Last Update</h3>
+          <p id="last-update">Loading...</p>
+          <small>Timestamp</small>
+        </div>
+      </div>
+      
+      <div id="map"></div>
+      
+      <div class="wifi-list">
+        <h3>Detected WiFi Networks</h3>
+        <div id="wifi-networks">Loading networks...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  
+  <!-- Leaflet Maps -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  
+  <script>
+    // Firebase configuration - Replace with your actual config
+    const firebaseConfig = {
+        apiKey: "AIzaSyAekZM44n4e3T14re3HwZaUAI8OjMDIIOY",
+        authDomain: "esp8266-test-4ed5d.firebaseapp.com",
+        databaseURL: "https://esp8266-test-4ed5d-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "esp8266-test-4ed5d",
+        storageBucket: "esp8266-test-4ed5d.firebasestorage.app",
+        messagingSenderId: "817595336847",
+        appId: "1:817595336847:web:d529d4b0c68c0cd4cfc8fa",
+        measurementId: "G-73NDJCHG04"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
+    // Initialize map
+    let map;
+    let markers = [];
+    
+    function initMap() {
+      map = L.map('map').setView([52.52, 13.40], 13);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+      }).addTo(map);
+    }
+    
+    function getSignalStrengthClass(rssi) {
+      if (rssi >= -30) return 'signal-excellent';
+      if (rssi >= -50) return 'signal-good';
+      if (rssi >= -60) return 'signal-fair';
+      if (rssi >= -70) return 'signal-poor';
+      return 'signal-very-poor';
+    }
+    
+    function formatTimestamp(timestamp) {
+      const date = new Date(timestamp);
+      return date.toLocaleString();
+    }
+    
+    function clearMarkers() {
+      markers.forEach(marker => map.removeLayer(marker));
+      markers = [];
+    }
+    
+    function updateDisplay(data) {
+      const powerStatus = document.getElementById('power-status');
+      const powerText = document.getElementById('power-text');
+      const powerValue = document.getElementById('power-value');
+      const wifiCount = document.getElementById('wifi-count');
+      const lastUpdate = document.getElementById('last-update');
+      const wifiNetworks = document.getElementById('wifi-networks');
+      
+      // Update power status
+      const power = data.power;
+      powerText.textContent = power.status;
+      powerValue.textContent = `Raw value: ${power.value}`;
+      
+      if (power.status === 'ON') {
+        powerStatus.className = 'status-item power-status';
+      } else {
+        powerStatus.className = 'status-item power-status off';
+      }
+      
+      // Update WiFi count
+      const wifiData = data.wifi || {};
+      const wifiNetworkCount = Object.keys(wifiData).length;
+      wifiCount.textContent = wifiNetworkCount;
+      
+      // Update timestamp
+      lastUpdate.textContent = formatTimestamp(data.timestamp);
+      
+      // Clear existing markers
+      clearMarkers();
+      
+      // Update WiFi networks list and map
+      let networksHtml = '';
+      Object.values(wifiData).forEach((network, index) => {
+        const signalClass = getSignalStrengthClass(network.rssi);
+        networksHtml += `
+          <div class="wifi-item">
+            <span><strong>${network.ssid}</strong></span>
+            <span class="signal-strength ${signalClass}">${network.rssi} dBm</span>
+          </div>
+        `;
+        
+        // Add marker to map
+        const lat = data.location?.lat || 52.5200;
+        const lng = data.location?.lng || 13.4050;
+        
+        const marker = L.marker([lat + (index * 0.001), lng + (index * 0.001)])
+          .addTo(map)
+          .bindPopup(`
+            <b>${network.ssid}</b><br>
+            RSSI: ${network.rssi} dBm<br>
+            Power: ${power.status}
+          `);
+        
+        markers.push(marker);
+      });
+      
+      wifiNetworks.innerHTML = networksHtml || '<p>No WiFi networks detected</p>';
+    }
+    
+    function loadLatestData() {
+      // Get the latest entry from Firebase
+      database.ref('iot-data').orderByKey().limitToLast(1).once('value')
+        .then(snapshot => {
+          const data = snapshot.val();
+          if (data) {
+            const latestKey = Object.keys(data)[0];
+            const latestData = data[latestKey];
+            
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('content').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+            
+            updateDisplay(latestData);
+          } else {
+            throw new Error('No data found');
+          }
+        })
+        .catch(error => {
+          console.error('Error loading data:', error);
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('error').style.display = 'block';
+        });
+    }
+    
+    // Initialize everything
+    document.addEventListener('DOMContentLoaded', function() {
+      initMap();
+      loadLatestData();
+      
+      // Auto-refresh every 10 seconds
+      setInterval(loadLatestData, 10000);
+      
+      // Listen for real-time updates
+      database.ref('iot-data').on('child_added', function(snapshot) {
+        const data = snapshot.val();
+        updateDisplay(data);
+      });
+    });
+  </script>
+</body>
+</html>
