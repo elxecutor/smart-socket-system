@@ -1,0 +1,13 @@
+[wokwi]
+version = 1
+firmware = '.pio/build/esp32dev/firmware.bin'
+elf = '.pio/build/esp32dev/firmware.elf'
+
+# WiFi configuration for Wokwi
+[[net.forward]]
+from = "localhost:4040"
+to = "target:80"
+
+[env]
+# Enable WiFi simulation
+WOKWI_HOST_ENABLE = "1"
