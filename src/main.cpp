@@ -37,7 +37,6 @@ FirebaseClient firebaseClient;
 
 // Timing variables
 unsigned long lastDataSend = 0;
-unsigned long lastWiFiScan = 0;
 
 void setup() {
     Serial.begin(SERIAL_BAUD_RATE);
@@ -146,18 +145,4 @@ void loop() {
     
     // Small delay to prevent watchdog issues
     delay(100);
-}
-
-/**
- * Additional utility functions for debugging and monitoring
- */
-void printSystemInfo() {
-    Serial.println("=== System Information ===");
-    Serial.printf("Chip Model: %s\n", ESP.getChipModel());
-    Serial.printf("Chip Revision: %d\n", ESP.getChipRevision());
-    Serial.printf("CPU Frequency: %d MHz\n", ESP.getCpuFreqMHz());
-    Serial.printf("Flash Size: %d bytes\n", ESP.getFlashChipSize());
-    Serial.printf("Free Heap: %d bytes\n", ESP.getFreeHeap());
-    Serial.printf("Uptime: %lu ms\n", millis());
-    Serial.println("==========================\n");
 }
