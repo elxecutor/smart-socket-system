@@ -16,7 +16,6 @@ public:
     void update();
     int getPowerValue();
     bool getPowerStatus();
-    bool hasNewReading();
     void printSensorData();
 };
 

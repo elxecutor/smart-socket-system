@@ -20,10 +20,6 @@ public:
     FirebaseClient();
     bool begin();
     bool sendData(int powerValue, bool powerStatus, int networkCount, WiFiManager* wifiMgr);
-    bool sendSensorData(int powerValue, bool powerStatus);
-    bool sendWiFiData(int networkCount);
-    void addWiFiNetwork(StaticJsonDocument<JSON_BUFFER_SIZE>& doc, int index, 
-                       const String& ssid, int rssi);
     void end();
 };
 

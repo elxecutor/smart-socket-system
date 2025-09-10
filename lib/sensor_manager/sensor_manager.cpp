@@ -6,8 +6,8 @@ SensorManager::SensorManager() : powerValue(0), powerStatus(false), lastReading(
 
 void SensorManager::begin() {
     pinMode(POWER_SENSOR_PIN, INPUT);
-    Serial.printf("Power sensor initialized on pin %d\n", POWER_SENSOR_PIN);
-    Serial.printf("Power threshold set to %d\n", POWER_THRESHOLD);
+    DEBUG_PRINTF("Power sensor initialized on pin %d\n", POWER_SENSOR_PIN);
+    DEBUG_PRINTF("Power threshold set to %d\n", POWER_THRESHOLD);
 }
 
 void SensorManager::update() {
@@ -27,15 +27,6 @@ int SensorManager::getPowerValue() {
 
 bool SensorManager::getPowerStatus() {
     return powerStatus;
-}
-
-bool SensorManager::hasNewReading() {
-    static unsigned long lastCheck = 0;
-    if (lastReading > lastCheck) {
-        lastCheck = lastReading;
-        return true;
-    }
-    return false;
 }
 
 void SensorManager::printSensorData() {

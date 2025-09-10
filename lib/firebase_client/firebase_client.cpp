@@ -7,15 +7,15 @@ FirebaseClient::FirebaseClient() {
 }
 
 bool FirebaseClient::begin() {
-    Serial.println("Firebase client initialized");
-    Serial.printf("Firebase Host: %s\n", FIREBASE_HOST);
+    DEBUG_PRINTLN("Firebase client initialized");
+    DEBUG_PRINTF("Firebase Host: %s\n", FIREBASE_HOST);
     
     // Don't print the full auth token for security
     String authPreview = String(FIREBASE_AUTH);
     if (authPreview.length() > 10) {
         authPreview = authPreview.substring(0, 10) + "...";
     }
-    Serial.printf("Firebase Auth: %s\n", authPreview.c_str());
+    DEBUG_PRINTF("Firebase Auth: %s\n", authPreview.c_str());
     
     return true;
 }
@@ -57,7 +57,7 @@ String FirebaseClient::createJSONPayload(int powerValue, bool powerStatus, int n
 
 bool FirebaseClient::sendData(int powerValue, bool powerStatus, int networkCount, WiFiManager* wifiMgr) {
     if (wifiMgr && !wifiMgr->isWiFiConnected()) {
-        Serial.println("❌ Cannot send data - WiFi not connected");
+        DEBUG_PRINTLN("❌ Cannot send data - WiFi not connected");
         return false;
     }
     
@@ -69,54 +69,32 @@ bool FirebaseClient::sendData(int powerValue, bool powerStatus, int networkCount
     
     http.begin(url);
     http.addHeader("Content-Type", "application/json");
-    http.setTimeout(HTTP_TIMEOUT);  // Set HTTP timeout
+    http.setTimeout(HTTP_TIMEOUT);
     
-    // Add Host header when using IP address to ensure proper Firebase routing
-    http.addHeader("Host", "esp8266-test-4ed5d-default-rtdb.europe-west1.firebasedatabase.app");
+    // Add Host header for proper Firebase routing
+    http.addHeader("Host", FIREBASE_HOST);
     
-    Serial.println("Sending data to Firebase...");
+    DEBUG_PRINTLN("Sending data to Firebase...");
     int httpResponseCode = http.POST(jsonPayload);
     
     if (httpResponseCode > 0) {
         String response = http.getString();
-        Serial.printf("✅ Firebase response: %d\n", httpResponseCode);
+        DEBUG_PRINTF("✅ Firebase response: %d\n", httpResponseCode);
         
         if (httpResponseCode == 200) {
             DEBUG_PRINTF("Response: %s\n", response.c_str());
             http.end();
             return true;
         } else {
-            Serial.printf("⚠️  Unexpected response code: %d\n", httpResponseCode);
-            Serial.printf("Response: %s\n", response.c_str());
+            DEBUG_PRINTF("⚠️  Unexpected response code: %d\n", httpResponseCode);
+            DEBUG_PRINTF("Response: %s\n", response.c_str());
         }
     } else {
-        Serial.printf("❌ Firebase send failed: %d\n", httpResponseCode);
+        DEBUG_PRINTF("❌ Firebase send failed: %d\n", httpResponseCode);
     }
     
     http.end();
     return false;
-}
-
-bool FirebaseClient::sendSensorData(int powerValue, bool powerStatus) {
-    return sendData(powerValue, powerStatus, 0, nullptr);
-}
-
-bool FirebaseClient::sendWiFiData(int networkCount) {
-    return sendData(0, false, networkCount, nullptr);
-}
-
-void FirebaseClient::addWiFiNetwork(StaticJsonDocument<JSON_BUFFER_SIZE>& doc, int index, 
-                                   const String& ssid, int rssi) {
-    JsonArray networks;
-    if (doc.containsKey("wifi")) {
-        networks = doc["wifi"];
-    } else {
-        networks = doc.createNestedArray("wifi");
-    }
-    
-    JsonObject net = networks.createNestedObject();
-    net["ssid"] = ssid;
-    net["rssi"] = rssi;
 }
 
 void FirebaseClient::end() {

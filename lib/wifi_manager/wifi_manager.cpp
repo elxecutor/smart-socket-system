@@ -81,9 +81,9 @@ IPAddress WiFiManager::getLocalIP() {
 }
 
 void WiFiManager::printNetworkInfo() {
-    Serial.printf("IP Address: %s\n", WiFi.localIP().toString().c_str());
-    Serial.printf("Gateway: %s\n", WiFi.gatewayIP().toString().c_str());
-    Serial.printf("Subnet: %s\n", WiFi.subnetMask().toString().c_str());
-    Serial.printf("DNS: %s\n", WiFi.dnsIP().toString().c_str());
-    Serial.printf("RSSI: %d dBm\n", WiFi.RSSI());
+    DEBUG_PRINTF("IP Address: %s\n", WiFi.localIP().toString().c_str());
+    DEBUG_PRINTF("Gateway: %s\n", WiFi.gatewayIP().toString().c_str());
+    DEBUG_PRINTF("Subnet: %s\n", WiFi.subnetMask().toString().c_str());
+    DEBUG_PRINTF("DNS: %s\n", WiFi.dnsIP().toString().c_str());
+    DEBUG_PRINTF("RSSI: %d dBm\n", WiFi.RSSI());
 }

@@ -12,7 +12,7 @@ void LEDManager::begin() {
     digitalWrite(POWER_LED_PIN, LOW);
     digitalWrite(STATUS_LED_PIN, LOW);
     
-    Serial.printf("LEDs initialized - Power: Pin %d, Status: Pin %d\n", 
+    DEBUG_PRINTF("LEDs initialized - Power: Pin %d, Status: Pin %d\n", 
                  POWER_LED_PIN, STATUS_LED_PIN);
 }
 
