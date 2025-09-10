@@ -28,6 +28,7 @@ Thumbs.db
 logs/
 
 # Firebase & Credentials  
+firebase-config.h
 firebase-config.h.backup
 credentials.json
 service-account.json
