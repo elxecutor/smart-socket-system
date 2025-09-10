@@ -27,13 +27,27 @@ String FirebaseClient::constructURL() {
 String FirebaseClient::createJSONPayload(int powerValue, bool powerStatus, int networkCount, WiFiManager* wifiMgr) {
     StaticJsonDocument<JSON_BUFFER_SIZE> doc;
     
-    // Add timestamp
+    // Add timestamp (both epoch milliseconds and readable format)
     doc["timestamp"] = millis();
+    doc["datetime"] = String(__DATE__) + " " + String(__TIME__);
     
-    // Add power data
+    // Enhanced power data with detailed information
     JsonObject power = doc.createNestedObject("power");
     power["status"] = powerStatus ? "ON" : "OFF";
-    power["value"] = powerValue;
+    power["status_boolean"] = powerStatus;  // Explicit boolean for database queries
+    power["raw_adc_value"] = powerValue;
+    
+    // Calculate and include voltage if we have access to sensor manager functions
+    // This assumes the voltage calculation is consistent with power-config.h
+    float voltage = (float(powerValue) * 3.3 / 4095.0) / 0.66;
+    power["input_voltage"] = voltage;
+    power["detection_confidence"] = voltage > 4.0 ? "HIGH" : (voltage > 2.0 ? "MEDIUM" : "LOW");
+    
+    // Add system information
+    JsonObject system = doc.createNestedObject("system");
+    system["uptime_ms"] = millis();
+    system["free_heap"] = ESP.getFreeHeap();
+    system["wifi_connected"] = (wifiMgr && wifiMgr->isWiFiConnected());
     
     // Add location data (static for now)
     JsonObject location = doc.createNestedObject("location");
@@ -42,12 +56,17 @@ String FirebaseClient::createJSONPayload(int powerValue, bool powerStatus, int n
     
     // Add WiFi networks (only if wifiMgr is provided and networkCount > 0)
     if (wifiMgr && networkCount > 0) {
-        JsonArray networks = doc.createNestedArray("wifi");
+        JsonArray networks = doc.createNestedArray("wifi_networks");
         for (int i = 0; i < networkCount && i < MAX_WIFI_NETWORKS; i++) {
             JsonObject net = networks.createNestedObject();
             net["ssid"] = wifiMgr->getNetworkSSID(i);
             net["rssi"] = wifiMgr->getNetworkRSSI(i);
+            net["signal_strength"] = wifiMgr->getNetworkRSSI(i) > -50 ? "STRONG" : 
+                                   (wifiMgr->getNetworkRSSI(i) > -70 ? "MEDIUM" : "WEAK");
         }
+        system["wifi_networks_detected"] = networkCount;
+    } else {
+        system["wifi_networks_detected"] = 0;
     }
     
     String jsonString;

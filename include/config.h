@@ -1,14 +1,16 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "power-config.h"
+
 // Project Configuration
-#define PROJECT_NAME "IoT Power & WiFi Monitor"
-#define PROJECT_VERSION "1.0.0"
+#define PROJECT_NAME "IoT Power & WiFi Monitor (5V DC)"
+#define PROJECT_VERSION "1.1.0"
 #define FIRMWARE_BUILD_DATE __DATE__ " " __TIME__
 
-// Hardware Configuration
-#define POWER_SENSOR_PIN 34
-#define POWER_THRESHOLD 1000 // Analog value threshold for power detection
+// Hardware Configuration - Now defined in power-config.h
+// Legacy definitions for backward compatibility
+#define POWER_THRESHOLD POWER_ON_THRESHOLD // Use new 5V DC threshold
 
 // Network Configuration
 #define WIFI_SSID "el"

@@ -1,170 +1,17 @@
 {
   "version": 1,
-  "author": "GitHub Copilot",
+  "author": "IoT Power Monitor - 5V DC Edition",
   "editor": "wokwi",
   "parts": [
     {
       "type": "wokwi-esp32-devkit-v1",
       "id": "esp32",
       "top": 96,
-      "left": 0,
+      "left": 48,
       "attrs": {}
-    },
-    {
-      "type": "wokwi-led",
-      "id": "power_led",
-      "top": 249.6,
-      "left": 345.6,
-      "attrs": {
-        "color": "green"
-      }
-    },
-    {
-      "type": "wokwi-led",
-      "id": "status_led",
-      "top": 192,
-      "left": 345.6,
-      "attrs": {
-        "color": "blue"
-      }
-    },
-    {
-      "type": "wokwi-resistor",
-      "id": "power_led_resistor",
-      "top": 259.2,
-      "left": 278.4,
-      "attrs": {
-        "value": "220"
-      }
-    },
-    {
-      "type": "wokwi-resistor",
-      "id": "status_led_resistor", 
-      "top": 201.6,
-      "left": 278.4,
-      "attrs": {
-        "value": "220"
-      }
-    },
-    {
-      "type": "wokwi-potentiometer",
-      "id": "power_sensor",
-      "top": 105.6,
-      "left": 345.6,
-      "attrs": {
-        "value": "750"
-      }
-    },
-    {
-      "type": "wokwi-pushbutton",
-      "id": "reset_btn",
-      "top": 326.4,
-      "left": 345.6,
-      "attrs": {
-        "color": "red"
-      }
-    },
-    {
-      "type": "wokwi-resistor",
-      "id": "reset_pullup",
-      "top": 345.6,
-      "left": 278.4,
-      "attrs": {
-        "value": "10000"
-      }
     }
   ],
   "connections": [
-    [
-      "esp32:TX0",
-      "$serialMonitor:RX",
-      "",
-      []
-    ],
-    [
-      "esp32:RX0",
-      "$serialMonitor:TX",
-      "",
-      []
-    ],
-    [
-      "esp32:GND.1",
-      "power_led:C",
-      "black",
-      ["v0"]
-    ],
-    [
-      "power_led:A",
-      "power_led_resistor:2",
-      "green",
-      ["v0"]
-    ],
-    [
-      "power_led_resistor:1",
-      "esp32:D2",
-      "green",
-      ["v0"]
-    ],
-    [
-      "esp32:GND.1",
-      "status_led:C",
-      "black",
-      ["v0"]
-    ],
-    [
-      "status_led:A",
-      "status_led_resistor:2",
-      "blue",
-      ["v0"]
-    ],
-    [
-      "status_led_resistor:1",
-      "esp32:D4",
-      "blue",
-      ["v0"]
-    ],
-    [
-      "power_sensor:GND",
-      "esp32:GND.1",
-      "black",
-      ["v0"]
-    ],
-    [
-      "power_sensor:VCC",
-      "esp32:3V3",
-      "red",
-      ["v0"]
-    ],
-    [
-      "power_sensor:SIG",
-      "esp32:A0",
-      "yellow",
-      ["v0"]
-    ],
-    [
-      "reset_btn:1.l",
-      "esp32:GND.1",
-      "black",
-      ["v0"]
-    ],
-    [
-      "reset_btn:2.l",
-      "reset_pullup:2",
-      "white",
-      ["v0"]
-    ],
-    [
-      "reset_pullup:1",
-      "esp32:3V3",
-      "red",
-      ["v0"]
-    ],
-    [
-      "reset_btn:2.l",
-      "esp32:EN",
-      "white",
-      ["v0"]
-    ]
   ],
   "dependencies": {}
 }
