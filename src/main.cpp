@@ -8,14 +8,11 @@
  * - Power monitoring via analog sensor
  * - WiFi network scanning and mapping  
  * - Real-time Firebase data storage
- * - Visual LED status indicators
  * - Web dashboard with interactive map
  * 
  * Hardware:
  * - ESP32 DevKit v1
  * - Power sensor on pin 34
- * - Power status LED on pin 2 (Green)
- * - Connection status LED on pin 4 (Blue)
  * 
  * @version 1.0.0
  * @date 2025-09-09
@@ -26,13 +23,11 @@
 #include "config.h"
 #include "wifi_manager.h"
 #include "sensor_manager.h"
-#include "led_manager.h"
 #include "firebase_client.h"
 
 // Global objects
 WiFiManager wifiManager;
 SensorManager sensorManager;
-LEDManager ledManager;
 FirebaseClient firebaseClient;
 
 // Timing variables
@@ -50,18 +45,14 @@ void setup() {
     
     // Initialize hardware components
     Serial.println("Initializing hardware...");
-    ledManager.begin();
     sensorManager.begin();
     
     // Connect to WiFi
     Serial.println("Starting WiFi connection...");
-    ledManager.showConnecting();
     
     if (wifiManager.begin()) {
-        ledManager.setStatusLED(true);
         Serial.println("✅ WiFi connection successful");
     } else {
-        ledManager.showError();
         Serial.println("❌ WiFi connection failed - entering retry mode");
     }
     
@@ -77,24 +68,16 @@ void setup() {
     
     // Initial sensor reading
     sensorManager.update();
-    ledManager.updatePowerStatus(sensorManager.getPowerStatus());
 }
 
 void loop() {
     // Check WiFi connection
     if (!wifiManager.isWiFiConnected()) {
-        ledManager.setStatusLED(false);
         wifiManager.reconnect();
-        if (wifiManager.isWiFiConnected()) {
-            ledManager.setStatusLED(true);
-        }
     }
     
     // Update sensors
     sensorManager.update();
-    
-    // Update power LED based on sensor status
-    ledManager.updatePowerStatus(sensorManager.getPowerStatus());
     
     // Periodic data transmission
     if (millis() - lastDataSend >= SENSOR_READ_INTERVAL) {
@@ -111,11 +94,6 @@ void loop() {
         if (wifiManager.isWiFiConnected()) {
             Serial.println("\n--- Firebase Transmission ---");
             
-            // Flash status LED during transmission
-            ledManager.setStatusLED(false);
-            delay(LED_BLINK_DURATION);
-            ledManager.setStatusLED(true);
-            
             bool success = firebaseClient.sendData(
                 sensorManager.getPowerValue(),
                 sensorManager.getPowerStatus(),
@@ -124,10 +102,8 @@ void loop() {
             );
             
             if (success) {
-                ledManager.showSuccess();
                 Serial.println("✅ Data transmission successful\n");
             } else {
-                ledManager.showError();
                 Serial.println("❌ Data transmission failed\n");
             }
         } else {

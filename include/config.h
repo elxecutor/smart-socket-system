@@ -8,8 +8,6 @@
 
 // Hardware Configuration
 #define POWER_SENSOR_PIN 34
-#define POWER_LED_PIN 2      // Green LED - Power status indicator
-#define STATUS_LED_PIN 4     // Blue LED - WiFi/connection status
 #define POWER_THRESHOLD 1000 // Analog value threshold for power detection
 
 // Network Configuration
@@ -22,9 +20,6 @@
 #define SENSOR_READ_INTERVAL 10000    // 10 seconds between readings
 #define WIFI_SCAN_INTERVAL 10000      // 10 seconds between WiFi scans
 #define SERIAL_BAUD_RATE 115200
-#define LED_BLINK_DURATION 100
-#define LED_SUCCESS_BLINKS 2
-#define LED_ERROR_DURATION 1000
 
 // Data Configuration
 #define JSON_BUFFER_SIZE 1024
