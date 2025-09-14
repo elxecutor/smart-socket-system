@@ -29,8 +29,6 @@ bool GPSManager::begin(HardwareSerial* serial, int baudRate) {
     gpsSerial->begin(gpsBaudRate);
     
     DEBUG_PRINTLN("🛰️  GPS Manager initialized");
-    DEBUG_PRINTF("GPS Baud Rate: %d\n", gpsBaudRate);
-    DEBUG_PRINTF("GPS Timeout: %lu ms\n", gpsTimeout);
     
     gpsInitialized = true;
     lastStatusCheck = millis();
@@ -57,7 +55,7 @@ bool GPSManager::update() {
                 locationValid = true;
                 lastValidUpdate = millis();
                 
-                DEBUG_PRINTF("GPS Location Update: %.6f, %.6f\n", latitude, longitude);
+                // Remove verbose location update messages
             }
             
             // Update altitude if valid
@@ -75,20 +73,20 @@ bool GPSManager::update() {
         }
     }
     
-    // Check for GPS timeout
-    if (millis() - lastStatusCheck > 5000) { // Check every 5 seconds
+    // Check for GPS timeout - only warn occasionally, not continuously
+    if (millis() - lastStatusCheck > 30000) { // Check every 30 seconds instead of 5
         lastStatusCheck = millis();
         
         if (millis() > 5000 && gps.charsProcessed() < 10) {
-            DEBUG_PRINTLN("⚠️  GPS Warning: No GPS data received - check wiring");
+            DEBUG_PRINTLN("⚠️  GPS: No data received - check wiring");
             locationValid = false;
         }
     }
     
     // Check if location data is stale
     if (locationValid && (millis() - lastValidUpdate > gpsTimeout)) {
-        DEBUG_PRINTLN("⚠️  GPS Warning: Location data is stale");
         locationValid = false;
+        // Don't spam warnings about stale data
     }
     
     return newData;

@@ -36,10 +36,6 @@ bool OptocouplerManager::begin(int pin, bool activeLow, unsigned long debounceMs
     lastStateChangeTime = millis();
     
     DEBUG_PRINTLN("🔌 OptocouplerManager initialized");
-    DEBUG_PRINTF("Pin: %d\n", optocouplerPin);
-    DEBUG_PRINTF("Active Low: %s\n", activeLow ? "YES" : "NO");
-    DEBUG_PRINTF("Debounce: %lu ms\n", debounceDelay);
-    DEBUG_PRINTF("Initial State: %s\n", currentPowerState ? "POWER ON" : "POWER OFF");
     
     return true;
 }
@@ -68,8 +64,8 @@ bool OptocouplerManager::update() {
             // Update statistics
             updateStatistics(currentPowerState);
             
-            DEBUG_PRINTF("🔌 Power State Changed: %s\n", 
-                        currentPowerState ? "POWER ON" : "POWER OFF");
+            // Only log significant state changes, not debug noise
+            // This will be logged in main.cpp when update() returns true
         }
     }
     
@@ -224,8 +220,6 @@ void OptocouplerManager::resetStatistics() {
     stateChangeCount = 0;
     lastPowerOnTimestamp = currentPowerState ? millis() : 0;
     lastPowerOffTimestamp = !currentPowerState ? millis() : 0;
-    
-    DEBUG_PRINTLN("🔌 Optocoupler statistics reset");
 }
 
 bool OptocouplerManager::getRawState() {

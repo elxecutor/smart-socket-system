@@ -119,9 +119,8 @@ void loop() {
     
     // Update optocoupler data
     if (optocouplerManager.update()) {
-        // Power state changed - log it
-        Serial.printf("🔌 External Power Changed: %s\n", 
-                     optocouplerManager.getPowerStatusString().c_str());
+        // Power state changed - show brief message
+        Serial.printf("🔌 Power: %s\n", optocouplerManager.getPowerStatusString().c_str());
     }
     
     // Periodic data transmission
@@ -129,28 +128,11 @@ void loop() {
         lastDataSend = millis();
         
         // Scan WiFi networks
-        Serial.println("\n--- WiFi Network Scan ---");
+        Serial.println("\n--- Data Transmission ---");
         int networkCount = wifiManager.scanNetworks();
         
         // Send data to Firebase
         if (wifiManager.isWiFiConnected()) {
-            Serial.println("\n--- Firebase Transmission ---");
-            
-            // Display GPS status before transmission
-            if (gpsManager.isLocationValid()) {
-                Serial.printf("GPS Location: %.6f, %.6f (%.1fm)\n", 
-                             gpsManager.getLatitude(), gpsManager.getLongitude(), gpsManager.getAltitude());
-                Serial.printf("GPS Quality: %s (%d satellites)\n", 
-                             gpsManager.getSignalQuality().c_str(), gpsManager.getSatelliteCount());
-            } else {
-                Serial.println("GPS Location: Using default coordinates (GPS not available)");
-            }
-            
-            // Display power status before transmission
-            Serial.printf("External Power: %s (%s)\n", 
-                         optocouplerManager.getPowerStatusString().c_str(),
-                         optocouplerManager.getPowerStability().c_str());
-            
             bool success = firebaseClient.sendData(
                 networkCount,
                 &wifiManager,
@@ -159,47 +141,41 @@ void loop() {
             );
             
             if (success) {
-                Serial.println("✅ Data transmission successful");
-                Serial.println("   → GPS location recorded");
-                Serial.println("   → External power status recorded");
-                Serial.println("   → WiFi networks recorded");
+                Serial.println("✅ Data sent to database");
             } else {
                 Serial.println("❌ Data transmission failed");
             }
         } else {
-            Serial.println("❌ Skipping Firebase transmission - WiFi not connected");
+            Serial.println("❌ No WiFi - skipping transmission");
         }
         
-        // Print system status
-        Serial.println("--- System Status ---");
-        Serial.printf("Uptime: %lu ms\n", millis());
-        Serial.printf("Free Heap: %u bytes\n", ESP.getFreeHeap());
-        Serial.printf("WiFi Status: %s\n", wifiManager.isWiFiConnected() ? "Connected" : "Disconnected");
+        // Print compact system status
+        Serial.println("--- Status ---");
+        Serial.printf("Uptime: %lu min | Heap: %u KB | WiFi: %s\n", 
+                     millis()/60000, ESP.getFreeHeap()/1024, 
+                     wifiManager.isWiFiConnected() ? "✓" : "✗");
         
-        // External power status summary
-        Serial.printf("External Power: %s (%s)\n", 
-                     optocouplerManager.getPowerStatusString().c_str(),
-                     optocouplerManager.getPowerStability().c_str());
+        // Compact power status
+        Serial.printf("Power: %s", optocouplerManager.getPowerStatusString().c_str());
         if (optocouplerManager.getStateChangeCount() > 0) {
             unsigned long totalTime = optocouplerManager.getTotalPowerOnTime() + optocouplerManager.getTotalPowerOffTime();
             if (totalTime > 0) {
                 float uptime = (float)optocouplerManager.getTotalPowerOnTime() / totalTime * 100.0;
-                Serial.printf("Power Uptime: %.1f%%\n", uptime);
+                Serial.printf(" (%.1f%% uptime)", uptime);
             }
         }
+        Serial.println();
         
-        // GPS status summary
+        // Compact GPS status
         if (gpsManager.isLocationValid()) {
-            Serial.printf("GPS Status: Active (%.6f, %.6f)\n", 
-                         gpsManager.getLatitude(), gpsManager.getLongitude());
-            Serial.printf("GPS Quality: %s (%d sats)\n", 
-                         gpsManager.getSignalQuality().c_str(), gpsManager.getSatelliteCount());
+            Serial.printf("GPS: %.4f,%.4f (%d sats)\n", 
+                         gpsManager.getLatitude(), gpsManager.getLongitude(),
+                         gpsManager.getSatelliteCount());
         } else {
-            Serial.printf("GPS Status: %s\n", gpsManager.isGPSActive() ? "Searching..." : "Inactive");
+            Serial.printf("GPS: %s\n", gpsManager.isGPSActive() ? "Searching..." : "Inactive");
         }
         
-        Serial.println("Commands: 'g'=GPS, 'i'=GPS debug, 'p'=power, 'o'=power debug, 'r'=reset stats");
-        Serial.println("========================\n");
+        Serial.println("Commands: g=GPS p=Power o=Debug r=Reset | ----\n");
     }
     
     // Small delay to prevent watchdog issues

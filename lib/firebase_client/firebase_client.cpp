@@ -10,14 +10,6 @@ FirebaseClient::FirebaseClient() {
 
 bool FirebaseClient::begin() {
     DEBUG_PRINTLN("Firebase client initialized");
-    DEBUG_PRINTF("Firebase Host: %s\n", FIREBASE_HOST);
-    
-    // Don't print the full auth token for security
-    String authPreview = String(FIREBASE_AUTH);
-    if (authPreview.length() > 10) {
-        authPreview = authPreview.substring(0, 10) + "...";
-    }
-    DEBUG_PRINTF("Firebase Auth: %s\n", authPreview.c_str());
     
     return true;
 }
@@ -135,29 +127,9 @@ bool FirebaseClient::sendData(int networkCount, WiFiManager* wifiMgr, GPSManager
     String url = constructURL();
     String jsonPayload = createJSONPayload(networkCount, wifiMgr, gpsMgr, optocouplerMgr);
     
-    DEBUG_PRINTF("Firebase URL: %s\n", url.c_str());
-    DEBUG_PRINTF("JSON Payload: %s\n", jsonPayload.c_str());
+    // Remove verbose debug output - only show in case of errors
     
-    // Print GPS status for debugging
-    if (gpsMgr) {
-        if (gpsMgr->isLocationValid()) {
-            DEBUG_PRINTF("📍 Using GPS coordinates: %.6f, %.6f\n", 
-                        gpsMgr->getLatitude(), gpsMgr->getLongitude());
-        } else {
-            DEBUG_PRINTLN("📍 Using default coordinates (GPS not available)");
-        }
-    } else {
-        DEBUG_PRINTLN("📍 Using default coordinates (GPS not initialized)");
-    }
-    
-    // Print optocoupler status for debugging
-    if (optocouplerMgr) {
-        DEBUG_PRINTF("🔌 External Power: %s (%s)\n", 
-                    optocouplerMgr->getPowerStatusString().c_str(),
-                    optocouplerMgr->getPowerStability().c_str());
-    } else {
-        DEBUG_PRINTLN("🔌 External Power: Not monitored");
-    }
+    // Remove verbose GPS and power debug output - these are shown in main.cpp
     
     http.begin(url);
     http.addHeader("Content-Type", "application/json");
@@ -166,19 +138,18 @@ bool FirebaseClient::sendData(int networkCount, WiFiManager* wifiMgr, GPSManager
     // Add Host header for proper Firebase routing
     http.addHeader("Host", FIREBASE_HOST);
     
-    DEBUG_PRINTLN("Sending data to Firebase...");
     int httpResponseCode = http.POST(jsonPayload);
     
     if (httpResponseCode > 0) {
         String response = http.getString();
-        DEBUG_PRINTF("✅ Firebase response: %d\n", httpResponseCode);
         
         if (httpResponseCode == 200) {
-            DEBUG_PRINTF("Response: %s\n", response.c_str());
+            // Success - no debug output needed
             http.end();
             return true;
         } else {
-            DEBUG_PRINTF("⚠️  Unexpected response code: %d\n", httpResponseCode);
+            // Only show debug info on errors
+            DEBUG_PRINTF("⚠️  Firebase unexpected response: %d\n", httpResponseCode);
             DEBUG_PRINTF("Response: %s\n", response.c_str());
         }
     } else {
