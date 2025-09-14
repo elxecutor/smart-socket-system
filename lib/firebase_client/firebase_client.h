@@ -7,19 +7,21 @@
 #include "firebase-config.h"
 #include "config.h"
 
-// Forward declaration
+// Forward declarations
 class WiFiManager;
+class GPSManager;
+class OptocouplerManager;
 
 class FirebaseClient {
 private:
     HTTPClient http;
     String constructURL();
-    String createJSONPayload(int powerValue, bool powerStatus, int networkCount, WiFiManager* wifiMgr);
+    String createJSONPayload(int networkCount, WiFiManager* wifiMgr, GPSManager* gpsMgr, OptocouplerManager* optocouplerMgr);
     
 public:
     FirebaseClient();
     bool begin();
-    bool sendData(int powerValue, bool powerStatus, int networkCount, WiFiManager* wifiMgr);
+    bool sendData(int networkCount, WiFiManager* wifiMgr, GPSManager* gpsMgr = nullptr, OptocouplerManager* optocouplerMgr = nullptr);
     void end();
 };
 

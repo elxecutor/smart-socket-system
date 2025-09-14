@@ -1,16 +1,10 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include "power-config.h"
-
 // Project Configuration
-#define PROJECT_NAME "IoT Power & WiFi Monitor (5V DC)"
-#define PROJECT_VERSION "1.1.0"
+#define PROJECT_NAME "IoT GPS & WiFi Monitor with Power Detection"
+#define PROJECT_VERSION "2.1.0"
 #define FIRMWARE_BUILD_DATE __DATE__ " " __TIME__
-
-// Hardware Configuration - Now defined in power-config.h
-// Legacy definitions for backward compatibility
-#define POWER_THRESHOLD POWER_ON_THRESHOLD // Use new 5V DC threshold
 
 // Network Configuration
 #define WIFI_SSID "el"
@@ -22,6 +16,17 @@
 #define SENSOR_READ_INTERVAL 10000    // 10 seconds between readings
 #define WIFI_SCAN_INTERVAL 10000      // 10 seconds between WiFi scans
 #define SERIAL_BAUD_RATE 115200
+
+// GPS Configuration
+#define GPS_BAUDRATE 9600             // Default NEO-6M GPS module baud rate
+#define GPS_TIMEOUT_MS 30000          // 30 seconds timeout for GPS data
+#define GPS_UPDATE_INTERVAL 1000      // 1 second between GPS updates
+
+// Optocoupler Configuration
+#define OPTOCOUPLER_PIN 4             // GPIO pin connected to optocoupler output
+#define OPTOCOUPLER_ACTIVE_LOW true   // Optocoupler output is active low
+#define OPTOCOUPLER_DEBOUNCE_MS 50    // Debounce time for power state changes
+#define OPTOCOUPLER_STABLE_TIME 5000  // Time to consider power state stable (5 seconds)
 
 // Data Configuration
 #define JSON_BUFFER_SIZE 1024
