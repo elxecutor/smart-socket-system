@@ -52,7 +52,7 @@ void setup() {
     
     // Initialize optocoupler manager
     Serial.println("Initializing external power monitoring...");
-    if (optocouplerManager.begin(OPTOCOUPLER_PIN, OPTOCOUPLER_ACTIVE_LOW, OPTOCOUPLER_DEBOUNCE_MS)) {
+    if (optocouplerManager.begin(OPTOCOUPLER_PIN, false, OPTOCOUPLER_DEBOUNCE_MS)) {
         Serial.println("✅ Optocoupler initialized");
         Serial.printf("External Power: %s\n", optocouplerManager.getPowerStatusString().c_str());
     } else {

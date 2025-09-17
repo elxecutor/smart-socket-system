@@ -3,9 +3,9 @@
 
 // IMPORTANT: For Firebase ESP32 Client, use only the host part (no https://)
 // Using IP address to avoid DNS resolution issues in simulation environments
-#define FIREBASE_HOST "esp8266-test-4ed5d-default-rtdb.europe-west1.firebasedatabase.app"
+#define FIREBASE_HOST "smartplug-central-h64l7-default-rtdb.firebaseio.com"
 // "esp8266-test-4ed5d-default-rtdb.europe-west1.firebasedatabase.app"
-#define FIREBASE_AUTH "AIzaSyAekZM44n4e3T14re3HwZaUAI8OjMDIIOY"
+#define FIREBASE_AUTH "AIzaSyAn4TSOvrAVfhhxu-lROOcbaO9ZasGL8Jw"
 
 // Alternative: If you need the domain, use the original:
 // #define FIREBASE_HOST "esp8266-test-4ed5d-default-rtdb.europe-west1.firebasedatabase.app"

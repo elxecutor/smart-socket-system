@@ -7,8 +7,8 @@
 #define FIRMWARE_BUILD_DATE __DATE__ " " __TIME__
 
 // Network Configuration
-#define WIFI_SSID "el"
-#define WIFI_PASSWORD "38a09a59aa48"
+#define WIFI_SSID "GL"
+#define WIFI_PASSWORD "98754321"
 #define WIFI_CONNECTION_TIMEOUT 30000 // 30 seconds
 #define WIFI_RETRY_DELAY 500
 
@@ -23,7 +23,7 @@
 #define GPS_UPDATE_INTERVAL 1000      // 1 second between GPS updates
 
 // Optocoupler Configuration
-#define OPTOCOUPLER_PIN 4             // GPIO pin connected to optocoupler output
+#define OPTOCOUPLER_PIN 34         // GPIO pin connected to optocoupler output
 #define OPTOCOUPLER_ACTIVE_LOW true   // Optocoupler output is active low
 #define OPTOCOUPLER_DEBOUNCE_MS 50    // Debounce time for power state changes
 #define OPTOCOUPLER_STABLE_TIME 5000  // Time to consider power state stable (5 seconds)
